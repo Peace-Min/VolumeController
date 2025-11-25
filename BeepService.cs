@@ -75,8 +75,12 @@ namespace VolumeController
                         MessageBeep(MB_ICONASTERISK);
                         break;
                     case BeepType.Question:
-                        // System question beep
-                        MessageBeep(MB_ICONQUESTION);
+                        // Question sound: rising tone beeps
+                        Beep(600, 100);
+                        System.Threading.Thread.Sleep(30);
+                        Beep(800, 100);
+                        System.Threading.Thread.Sleep(30);
+                        Beep(1000, 100);
                         break;
                 }
             }
