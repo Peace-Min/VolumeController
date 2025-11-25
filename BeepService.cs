@@ -80,10 +80,15 @@ namespace VolumeController
                         break;
                 }
             }
-            catch (Exception)
+            catch (DllNotFoundException ex)
             {
-                // Fallback to system beep if APIs fail
-                Console.Beep();
+                // DLL을 찾을 수 없는 경우
+                System.Windows.MessageBox.Show($"BeepService DLL 오류: {ex.Message}");
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                // API 함수를 찾을 수 없는 경우
+                System.Windows.MessageBox.Show($"BeepService API 오류: {ex.Message}");
             }
         }
     }

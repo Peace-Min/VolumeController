@@ -32,9 +32,17 @@ namespace VolumeController
                 
                 _audioEndpointVolume = (IAudioEndpointVolume)o;
             }
-            catch (Exception ex)
+            catch (MarshalDirectiveException ex)
             {
-                System.Windows.MessageBox.Show($"VolumeService Initialization Error: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}");
+                System.Windows.MessageBox.Show($"VolumeService COM 오류: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}");
+            }
+            catch (InvalidCastException ex)
+            {
+                System.Windows.MessageBox.Show($"VolumeService 형변환 오류: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}");
+            }
+            catch (COMException ex)
+            {
+                System.Windows.MessageBox.Show($"VolumeService COM 예외: {ex.Message}\n\nHRESULT: 0x{ex.ErrorCode:X}\n\nStack Trace:\n{ex.StackTrace}");
             }
         }
 
