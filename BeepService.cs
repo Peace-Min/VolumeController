@@ -32,6 +32,12 @@ namespace VolumeController
 
         public static void PlayBeep(BeepType beepType = BeepType.Alert)
         {
+            // UI 스레드를 블로킹하지 않도록 백그라운드에서 실행
+            System.Threading.Tasks.Task.Run(() => PlayBeepInternal(beepType));
+        }
+
+        private static void PlayBeepInternal(BeepType beepType)
+        {
             try
             {
                 switch (beepType)
