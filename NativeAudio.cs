@@ -64,4 +64,22 @@ namespace VolumeController
         eCommunications,
         ERole_enum_count
     }
+
+    [Guid("657804FA-D6AD-4496-8A60-352752AF4F89"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport]
+    internal interface IAudioEndpointVolumeCallback
+    {
+        [PreserveSig]
+        int OnNotify(IntPtr pNotify);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct AUDIO_VOLUME_NOTIFICATION_DATA
+    {
+        public Guid guidEventContext;
+        public bool bMuted;
+        public float fMasterVolume;
+        public uint nChannels;
+        public float afChannelVolumes; // First channel volume
+    }
 }

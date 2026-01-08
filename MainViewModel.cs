@@ -15,8 +15,29 @@ namespace VolumeController
             _volume = VolumeService.GetVolume();
             _isMuted = VolumeService.GetMute();
             
+            VolumeService.OnVolumeChanged += OnExternalVolumeChanged;
+
             // Initialize command
             PlayBeepCommand = new RelayCommand(ExecutePlayBeep);
+        }
+
+        private void OnExternalVolumeChanged(float newVolume, bool isMuted)
+        {
+            System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+            {
+                if (System.Math.Abs(_volume - newVolume) > 0.01)
+                {
+                    _volume = newVolume;
+                    OnPropertyChanged(nameof(Volume));
+                    OnPropertyChanged(nameof(VolumeText));
+                }
+
+                if (_isMuted != isMuted)
+                {
+                    _isMuted = isMuted;
+                    OnPropertyChanged(nameof(IsMuted));
+                }
+            });
         }
 
         public double Volume
