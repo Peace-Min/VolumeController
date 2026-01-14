@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:VolumeController"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+         <SolidColorBrush x:Key="VolumeWaveBackgroundBrush" Color="#E0E0E0"/>
     </Application.Resources>
 </Application>

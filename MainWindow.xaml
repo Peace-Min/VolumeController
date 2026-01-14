@@ -26,15 +26,21 @@
                 <CheckBox.Template>
                     <ControlTemplate TargetType="CheckBox">
                         <Grid Background="Transparent" Width="48" Height="48">
-                            <!-- Mute Icon (Visible only when IsChecked=True) -->
-                            <Path x:Name="MuteIcon" 
-                                  Visibility="Collapsed"
-                                  Fill="#D32F2F"
-                                  Stretch="Uniform" 
-                                  VerticalAlignment="Center" 
-                                  HorizontalAlignment="Center"
-                                  Width="32" Height="32"
-                                  Data="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18.01,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12Z"/>
+                            <!-- Mute Icon Group (Visible only when IsChecked=True) -->
+                            <Viewbox x:Name="MuteIconGroup" Width="36" Height="36" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+                                <Canvas Width="24" Height="24">
+                                    <!-- Body: Same as Volume -->
+                                    <Path Fill="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}" 
+                                          Data="M4,9 L9,9 L14,4 L14,20 L9,15 L4,15 Z"/>
+                                    
+                                    <!-- X Mark: Stylized like the waves -->
+                                    <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}" 
+                                          StrokeThickness="2" 
+                                          StrokeStartLineCap="Round" 
+                                          StrokeEndLineCap="Round" 
+                                          Data="M17.5,9.5 L21.5,14.5 M21.5,9.5 L17.5,14.5"/>
+                                </Canvas>
+                            </Viewbox>
 
                             <!-- Corrected Viewbox for 3-Level Windows Style (Thin Lines) -->
                             <Viewbox x:Name="VolumeIconGroup_Corrected" Width="36" Height="36" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -45,9 +51,9 @@
                                           Data="M4,9 L9,9 L14,4 L14,20 L9,15 L4,15 Z"/>
                                     
                                     <!-- Background Waves (Always Grey) -->
-                                    <Path Stroke="#E0E0E0" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M16.5,9.5 A 3.5,3.5 0 0 1 16.5,14.5"/>
-                                    <Path Stroke="#E0E0E0" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M19.5,7 A 7,7 0 0 1 19.5,17"/>
-                                    <Path Stroke="#E0E0E0" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M22.5,4.5 A 10.5,10.5 0 0 1 22.5,19.5"/>
+                                    <Path Stroke="{StaticResource VolumeWaveBackgroundBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M16.5,9.5 A 3.5,3.5 0 0 1 16.5,14.5"/>
+                                    <Path Stroke="{StaticResource VolumeWaveBackgroundBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M19.5,7 A 7,7 0 0 1 19.5,17"/>
+                                    <Path Stroke="{StaticResource VolumeWaveBackgroundBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M22.5,4.5 A 10.5,10.5 0 0 1 22.5,19.5"/>
 
                                     <!-- Active Waves: Overlay that turns color -->
                                     <!-- Small Wave -->
@@ -80,7 +86,7 @@
                         <ControlTemplate.Triggers>
                             <!-- 1. Handle Muted State (Priority) -->
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="MuteIcon" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="MuteIconGroup" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="VolumeIconGroup_Corrected" Property="Visibility" Value="Collapsed"/>
                             </Trigger>
 
@@ -105,7 +111,7 @@
 
                             <!-- 3. Hover Effects -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="MuteIcon" Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="MuteIconGroup" Property="Opacity" Value="0.8"/>
                                 <Setter TargetName="VolumeIconGroup_Corrected" Property="Opacity" Value="0.8"/>
                                 <Setter Property="Cursor" Value="Hand"/>
                             </Trigger>
