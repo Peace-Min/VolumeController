@@ -19,7 +19,31 @@
                 <TextBlock x:Name="VolumeText" Text="{Binding VolumeText}" Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Width="40" TextAlignment="Right"/>
             </Grid>
 
-            <CheckBox x:Name="MuteCheckBox" Content="Mute" HorizontalAlignment="Center" IsChecked="{Binding IsMuted}"/>
+            <CheckBox x:Name="MuteCheckBox" HorizontalAlignment="Center" IsChecked="{Binding IsMuted}" BorderThickness="0" Background="Transparent" Foreground="#333333">
+                <CheckBox.Template>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent" Width="48" Height="48">
+                            <Path x:Name="IconPath" 
+                                  Fill="{TemplateBinding Foreground}" 
+                                  Stretch="Uniform" 
+                                  VerticalAlignment="Center" 
+                                  HorizontalAlignment="Center"
+                                  Width="32" Height="32"
+                                  Data="M3,9H7L12,4V20L7,15H3V9M16.5,12C16.5,10.23 15.48,8.71 14,7.97V16.02C15.48,15.29 16.5,13.77 16.5,12M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.85 14,18.71V20.77C18.01,19.86 21,16.28 21,12C21,7.72 18.01,4.14 14,3.23Z" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="IconPath" Property="Data" Value="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18.01,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12Z"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="Black"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="IconPath" Property="Opacity" Value="0.8"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </CheckBox.Template>
+            </CheckBox>
             
             <TextBlock Text="Beep Type" HorizontalAlignment="Center" Margin="0,15,0,5" FontWeight="SemiBold"/>
             <ComboBox x:Name="BeepTypeComboBox" HorizontalAlignment="Center" Width="150" SelectedItem="{Binding SelectedBeepType}">

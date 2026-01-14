@@ -30,10 +30,25 @@ namespace VolumeController
         private const uint MB_ICONEXCLAMATION = 0x00000030;
         private const uint MB_ICONASTERISK = 0x00000040;
 
+        private static readonly System.Collections.Concurrent.BlockingCollection<BeepType> _beepQueue = new System.Collections.Concurrent.BlockingCollection<BeepType>();
+
+        static BeepService()
+        {
+            // Start background consumer thread
+            System.Threading.Tasks.Task.Factory.StartNew(ProcessBeepQueue, System.Threading.Tasks.TaskCreationOptions.LongRunning);
+        }
+
         public static void PlayBeep(BeepType beepType = BeepType.Alert)
         {
-            // UI 스레드를 블로킹하지 않도록 백그라운드에서 실행
-            System.Threading.Tasks.Task.Run(() => PlayBeepInternal(beepType));
+            _beepQueue.Add(beepType);
+        }
+
+        private static void ProcessBeepQueue()
+        {
+            foreach (var beepType in _beepQueue.GetConsumingEnumerable())
+            {
+                PlayBeepInternal(beepType);
+            }
         }
 
         private static void PlayBeepInternal(BeepType beepType)
