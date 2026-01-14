@@ -6,6 +6,9 @@
         xmlns:local="clr-namespace:VolumeController"
         mc:Ignorable="d"
         Title="Volume Controller" Height="200" Width="400">
+    <Window.Resources>
+        <local:VolumeToIconConverter x:Key="VolumeToIconConverter"/>
+    </Window.Resources>
     <Grid Margin="20">
         <StackPanel VerticalAlignment="Center">
             <TextBlock Text="System Volume" HorizontalAlignment="Center" Margin="0,0,0,10" FontSize="16" FontWeight="Bold"/>
@@ -19,25 +22,91 @@
                 <TextBlock x:Name="VolumeText" Text="{Binding VolumeText}" Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Width="40" TextAlignment="Right"/>
             </Grid>
 
-            <CheckBox x:Name="MuteCheckBox" HorizontalAlignment="Center" IsChecked="{Binding IsMuted}" BorderThickness="0" Background="Transparent" Foreground="#333333">
+<CheckBox x:Name="MuteCheckBox" HorizontalAlignment="Center" IsChecked="{Binding IsMuted}" BorderThickness="0" Background="Transparent" Foreground="#333333" Tag="{Binding Volume}">
                 <CheckBox.Template>
                     <ControlTemplate TargetType="CheckBox">
                         <Grid Background="Transparent" Width="48" Height="48">
-                            <Path x:Name="IconPath" 
-                                  Fill="{TemplateBinding Foreground}" 
+                            <!-- Mute Icon (Visible only when IsChecked=True) -->
+                            <Path x:Name="MuteIcon" 
+                                  Visibility="Collapsed"
+                                  Fill="#D32F2F"
                                   Stretch="Uniform" 
                                   VerticalAlignment="Center" 
                                   HorizontalAlignment="Center"
                                   Width="32" Height="32"
-                                  Data="M3,9H7L12,4V20L7,15H3V9M16.5,12C16.5,10.23 15.48,8.71 14,7.97V16.02C15.48,15.29 16.5,13.77 16.5,12M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.85 14,18.71V20.77C18.01,19.86 21,16.28 21,12C21,7.72 18.01,4.14 14,3.23Z" />
+                                  Data="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18.01,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12Z"/>
+
+                            <!-- Corrected Viewbox for 3-Level Windows Style (Thin Lines) -->
+                            <Viewbox x:Name="VolumeIconGroup_Corrected" Width="36" Height="36" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Canvas Width="24" Height="24">
+                                    <!-- Body: Filled -->
+                                    <Path x:Name="SpkBody" 
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}" 
+                                          Data="M4,9 L9,9 L14,4 L14,20 L9,15 L4,15 Z"/>
+                                    
+                                    <!-- Background Waves (Always Grey) -->
+                                    <Path Stroke="#E0E0E0" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M16.5,9.5 A 3.5,3.5 0 0 1 16.5,14.5"/>
+                                    <Path Stroke="#E0E0E0" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M19.5,7 A 7,7 0 0 1 19.5,17"/>
+                                    <Path Stroke="#E0E0E0" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M22.5,4.5 A 10.5,10.5 0 0 1 22.5,19.5"/>
+
+                                    <!-- Active Waves: Overlay that turns color -->
+                                    <!-- Small Wave -->
+                                    <Path x:Name="WaveS" 
+                                          Stroke="Transparent" 
+                                          StrokeThickness="2"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          Data="M16.5,9.5 A 3.5,3.5 0 0 1 16.5,14.5"/>
+                                    
+                                    <!-- Medium Wave -->
+                                    <Path x:Name="WaveM" 
+                                          Stroke="Transparent" 
+                                          StrokeThickness="2"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          Data="M19.5,7 A 7,7 0 0 1 19.5,17"/>
+                                    
+                                    <!-- Large Wave -->
+                                    <Path x:Name="WaveL" 
+                                          Stroke="Transparent" 
+                                          StrokeThickness="2" 
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          Data="M22.5,4.5 A 10.5,10.5 0 0 1 22.5,19.5"/>
+                                </Canvas>
+                            </Viewbox>
                         </Grid>
+                        
                         <ControlTemplate.Triggers>
+                            <!-- 1. Handle Muted State (Priority) -->
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="IconPath" Property="Data" Value="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18.01,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12Z"/>
-                                <Setter TargetName="IconPath" Property="Fill" Value="Black"/>
+                                <Setter TargetName="MuteIcon" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="VolumeIconGroup_Corrected" Property="Visibility" Value="Collapsed"/>
                             </Trigger>
+
+                            <!-- 2. Handle Volume Levels for Waves (Target Stroke instead of Fill) -->
+                            <!-- Low Volume: Turn on WaveS -->
+                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource VolumeToIconConverter}}" Value="Low">
+                                <Setter TargetName="WaveS" Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            </DataTrigger>
+                            
+                            <!-- Medium Volume: Turn on WaveS AND WaveM -->
+                             <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource VolumeToIconConverter}}" Value="Medium">
+                                <Setter TargetName="WaveS" Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Setter TargetName="WaveM" Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            </DataTrigger>
+
+                            <!-- High Volume: Turn on WaveS AND WaveM AND WaveL -->
+                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource VolumeToIconConverter}}" Value="High">
+                                <Setter TargetName="WaveS" Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Setter TargetName="WaveM" Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Setter TargetName="WaveL" Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            </DataTrigger>
+
+                            <!-- 3. Hover Effects -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="IconPath" Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="MuteIcon" Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="VolumeIconGroup_Corrected" Property="Opacity" Value="0.8"/>
                                 <Setter Property="Cursor" Value="Hand"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
