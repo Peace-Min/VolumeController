@@ -21,14 +21,16 @@ namespace VolumeController
         [DllImport("kernel32.dll")]
         private static extern bool Beep(uint dwFreq, uint dwDuration);
 
-        [DllImport("user32.dll")]
-        private static extern bool MessageBeep(uint uType);
+        [DllImport("winmm.dll", EntryPoint = "PlaySound", CharSet = CharSet.Auto)]
+        private static extern bool PlaySound(string pszSound, IntPtr hmod, uint fdwSound);
 
-        // MessageBeep types
-        private const uint MB_ICONHAND = 0x00000010;
-        private const uint MB_ICONQUESTION = 0x00000020;
-        private const uint MB_ICONEXCLAMATION = 0x00000030;
-        private const uint MB_ICONASTERISK = 0x00000040;
+        // PlaySound flags
+        private const uint SND_SYNC = 0x0000;      // 소리가 끝날 때까지 리턴하지 않음 (블로킹)
+        private const uint SND_ASYNC = 0x0001;     // 소리 재생 시작 후 즉시 리턴
+        private const uint SND_ALIAS = 0x10000;    // 시스템 이벤트 이름 사용
+
+        // 연속된 음표 사이의 간격 (30ms 정도로 아주 짧게 주어 자연스럽게 연결)
+        private const int NOTE_SEPARATOR_MS = 30;
 
         private static readonly System.Collections.Concurrent.BlockingCollection<BeepType> _beepQueue = new System.Collections.Concurrent.BlockingCollection<BeepType>();
 
@@ -38,6 +40,10 @@ namespace VolumeController
             System.Threading.Tasks.Task.Factory.StartNew(ProcessBeepQueue, System.Threading.Tasks.TaskCreationOptions.LongRunning);
         }
 
+        /// <summary>
+        /// [외부 API] 비프음을 큐에 추가하고 즉시 리턴 (UI Non-blocking)
+        /// 사용법: BeepService.PlayBeep(BeepType.Warning);
+        /// </summary>
         public static void PlayBeep(BeepType beepType = BeepType.Alert)
         {
             _beepQueue.Add(beepType);
@@ -48,6 +54,8 @@ namespace VolumeController
             foreach (var beepType in _beepQueue.GetConsumingEnumerable())
             {
                 PlayBeepInternal(beepType);
+                // 소리 간 아주 미세한 간격 (50ms)
+                System.Threading.Thread.Sleep(50);
             }
         }
 
@@ -55,52 +63,49 @@ namespace VolumeController
         {
             try
             {
+                // PlaySound with SND_SYNC will wait until the sound finishes
+                const uint flags = SND_SYNC | SND_ALIAS;
+
                 switch (beepType)
                 {
                     case BeepType.LowTone:
-                        // Low frequency beep (300 Hz, 200ms)
-                        Beep(300, 200);
+                        Beep(300, 200); // Beep is already synchronous
                         break;
                     case BeepType.MediumTone:
-                        // Medium frequency beep (800 Hz, 200ms)
                         Beep(800, 200);
                         break;
                     case BeepType.HighTone:
-                        // High frequency beep (1500 Hz, 1000ms)
                         Beep(1500, 1000);
                         break;
                     case BeepType.Alert:
-                        // Alert sound: two quick beeps (1000 Hz)
                         Beep(1000, 150);
-                        System.Threading.Thread.Sleep(50);
+                        System.Threading.Thread.Sleep(NOTE_SEPARATOR_MS);
                         Beep(1000, 150);
                         break;
                     case BeepType.Alarm:
-                        // Alarm sound: alternating high-low beeps
                         Beep(1200, 100);
-                        System.Threading.Thread.Sleep(50);
+                        System.Threading.Thread.Sleep(NOTE_SEPARATOR_MS);
                         Beep(800, 100);
-                        System.Threading.Thread.Sleep(50);
+                        System.Threading.Thread.Sleep(NOTE_SEPARATOR_MS);
                         Beep(1200, 100);
                         break;
+                    
+                    // Synchronous System Sounds via PlaySound
                     case BeepType.Error:
-                        // System error beep
-                        MessageBeep(MB_ICONHAND);
+                        PlaySound("SystemHand", IntPtr.Zero, flags);
                         break;
                     case BeepType.Warning:
-                        // System warning beep
-                        MessageBeep(MB_ICONEXCLAMATION);
+                        PlaySound("SystemExclamation", IntPtr.Zero, flags);
                         break;
                     case BeepType.Information:
-                        // System information beep
-                        MessageBeep(MB_ICONASTERISK);
+                        PlaySound("SystemAsterisk", IntPtr.Zero, flags);
                         break;
+                        
                     case BeepType.Question:
-                        // Question sound: rising tone beeps
                         Beep(600, 100);
-                        System.Threading.Thread.Sleep(30);
+                        System.Threading.Thread.Sleep(NOTE_SEPARATOR_MS);
                         Beep(800, 100);
-                        System.Threading.Thread.Sleep(30);
+                        System.Threading.Thread.Sleep(NOTE_SEPARATOR_MS);
                         Beep(1000, 100);
                         break;
                 }
